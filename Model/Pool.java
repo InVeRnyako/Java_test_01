@@ -21,5 +21,4 @@ public class Pool<T extends PoolElement> implements Serializable {
         return toysPool;
     }
 
-//    public
 }

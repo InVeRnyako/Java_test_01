@@ -5,31 +5,50 @@ import Presenter.Presenter;
 import java.util.ArrayList;
 import java.util.Scanner;
 public class Console implements View{
+    String reading = "";
     private Scanner scanner;
     private MenuMain mainMenu;
     private Presenter presenter;
     private Boolean work = true;
-    String reading = "";
+    private Boolean autoSave = true;
 
     public Console(){
         scanner = new Scanner(System.in);
         mainMenu = new MenuMain(this);
 
     }
+    @Override
+    public void start() {
+        presenter.loadData();
+        while(work){
+            print(mainMenu.print());
+            Integer choice = readInt("Выберите действие: ");
+            mainMenu.execute(choice);
+        }
+    }
+    public void doAutoSave() {
+        if (autoSave)
+            presenter.saveData();
+    }
 
+    public void autoSaveSwitch(boolean autoSaveNewState){
+        autoSave = autoSaveNewState;
+    }
 
     @Override
     public void print(String outString) {
         System.out.println(outString);
     }
 
-    @Override
-    public void start() {
-        while(work){
-            print(mainMenu.print());
-            Integer choice = readInt("Выберите действие: ");
-            mainMenu.execute(choice);
-        }
+
+
+    public void loadSave(){
+        presenter.loadData();
+    }
+
+    public void quit(){
+        print("Всего доброго.");
+        work = false;
     }
 
     @Override
@@ -38,7 +57,7 @@ public class Console implements View{
     }
 
     public String read(String msg) {
-        Boolean noCorrect = true;
+        boolean noCorrect = true;
         reading = "";
         while (noCorrect) {
             print(msg);
@@ -72,9 +91,9 @@ public class Console implements View{
         while(true){
             print(msg);
             reading = scanner.nextLine();
-            if (reading.toLowerCase().equals("y"))
+            if (reading.equalsIgnoreCase("y"))
                 return true;
-            else if (reading.toLowerCase().equals("n")) {
+            else if (reading.equalsIgnoreCase("n")) {
                 return false;
             }
             print("Ошибка ввода данных");
@@ -85,12 +104,12 @@ public class Console implements View{
         return presenter.checkIfToyExists(newToyName);
     }
 
-    public void changeAmount(Integer id, Integer change) {
-        presenter.changeAmount(id, change);
-    }
-
     public void newToy(String newToyTitle, Integer newToyAmount, Integer newToyWeight) {
         presenter.newToy(newToyTitle,newToyAmount,newToyWeight);
+    }
+
+    public void changeAmount(Integer id, Integer change) {
+        presenter.changeAmount(id, change);
     }
 
     public String getToyFullInfo(Integer toyId){
@@ -105,8 +124,8 @@ public class Console implements View{
         return presenter.raffleWeighted(amountToRaffle);
     }
 
-    public void deleteToy(Integer toyId) {
-        presenter.deleteToy(toyId);
+    public boolean deleteToy(Integer toyId) {
+        return presenter.deleteToy(toyId);
     }
 
     public void loadPreLoad() {

@@ -12,9 +12,9 @@ import java.util.logging.SimpleFormatter;
 
 public class DataLogger {
     private final String LOG_FILE_NAME = "name.log";
+    private final Logger logger = Logger.getLogger(DataLogger.class.getName());
     private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss  ");
     private Date date = new Date();
-    private final Logger logger = Logger.getLogger(DataLogger.class.getName());
     private Presenter presenter;
 
     public DataLogger(Presenter presenter) {
@@ -30,14 +30,24 @@ public class DataLogger {
         }
     }
 
+    public String prepareToLog(String infoToLog){
+        StringBuilder logPreparer = new StringBuilder();
+        logPreparer.append(formatter.format(date));
+        logPreparer.append(infoToLog);
+        logPreparer.append("\n");
+        return logPreparer.toString();
+    }
+
     public void saveData(String data) {
-        logger.info(formatter.format(date) + data);
+        logger.info("\n" + data);
     }
 
     public void saveData(ArrayList<String> dataString){
+        StringBuilder combinedData = new StringBuilder();
         for (String line: dataString) {
-            saveData(line);
+            combinedData.append(line);
         }
+        saveData(combinedData.toString());
     }
 }
 

@@ -1,10 +1,10 @@
 package Model.Elements;
 
 public interface PoolElement {
-    public String getTitle();
-    public Integer getId();
+    String getTitle();
+    Integer getId();
 
-    public Integer getAmount();
+    Integer getAmount();
 
-    public void setAmount(Integer newAmount);
+    void setAmount(Integer newAmount);
 }

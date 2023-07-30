@@ -12,7 +12,7 @@ public class ToyItem implements Serializable, PoolElement {
         this.id = id;
         this.title = title;
         this.weight = weight;
-        this.amount = (Integer) (1);
+        this.amount = 1;
     }
 
     public ToyItem(Integer id, String title, Integer amount, Integer weight){
@@ -22,12 +22,12 @@ public class ToyItem implements Serializable, PoolElement {
         this.amount = amount;
     }
 
-    public void setAmount(Integer amount) {
-        this.amount = amount;
-    }
-
     public Integer getAmount() {
         return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
     }
 
     public Integer getId() {

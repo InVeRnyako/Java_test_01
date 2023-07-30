@@ -3,8 +3,8 @@ package View.Commands;
 import View.Console;
 
 public class RemoveToy extends Command{
+    private final String description = "Удалить игрушку из списка";
     Console console;
-    private String desription = "Удалить игрушку из списка";
 
     public RemoveToy(Console console){
         super(console);
@@ -12,8 +12,8 @@ public class RemoveToy extends Command{
     }
 
     @Override
-    public String getDiscription() {
-        return desription;
+    public String getDescription() {
+        return description;
     }
 
     @Override

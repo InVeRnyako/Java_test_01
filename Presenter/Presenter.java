@@ -25,9 +25,9 @@ public class Presenter {
         service.changeAmount(id, change);
     }
 
-    public String getStringFromUser(String msg){
-        return view.read(msg);
-    }
+//    public String getStringFromUser(String msg){
+//        return view.read(msg);
+//    }
 
     public void newToy(String newToyTitle, Integer newToyAmount, Integer newToyWeight) {
         service.newToy(newToyTitle,newToyAmount,newToyWeight);
@@ -39,7 +39,7 @@ public class Presenter {
 
     public String getToyFullInfo(Integer toyId){
         return service.getToyFullInfo(toyId);
-    };
+    }
 
     public void editToy(Integer toyId, String newTitle, String newAmount, String newWeight) {
         service.editToy(toyId, newTitle, newAmount, newWeight);
@@ -49,8 +49,8 @@ public class Presenter {
         return service.raffleWeighted(amountToRaffle);
     }
 
-    public void deleteToy(Integer toyId) {
-        service.deleteToy(toyId);
+    public boolean deleteToy(Integer toyId) {
+        return service.deleteToy(toyId);
     }
 
     public void loadPreload() {
@@ -59,5 +59,13 @@ public class Presenter {
 
     public ArrayList<String> viewAll() {
         return service.viewAll();
+    }
+
+    public void saveData() {
+        service.saveData();
+    }
+
+    public void loadData() {
+        service.loadData();
     }
 }

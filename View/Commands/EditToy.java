@@ -3,8 +3,8 @@ package View.Commands;
 import View.Console;
 
 public class EditToy extends Command{
+    private final String description = "Редактировать игрушку";
     Console console;
-    private String desription = "Редактировать игрушку";
 
     public EditToy(Console console){
         super(console);
@@ -12,13 +12,12 @@ public class EditToy extends Command{
     }
 
     @Override
-    public String getDiscription() {
-        return desription;
+    public String getDescription() {
+        return description;
     }
 
     @Override
     public void execute() {
-//        (TODO) Редактировать характеристики игрушки
         String toyTitle = console.read("Введите название игрушки для редактирования: ");
         Integer toyId = console.CheckIfToyExists(toyTitle);
         if (toyId > -1){
@@ -28,6 +27,7 @@ public class EditToy extends Command{
             String newAmount = console.readAcceptNothing("Введите новое количество: ");
             String newWeight = console.readAcceptNothing("Введите новый шанс на выигрыш: ");
             console.editToy(toyId, newTitle, newAmount, newWeight);
+            console.doAutoSave();
         } else {
             console.print("Игрушка с введенным названием не найдена");
         }

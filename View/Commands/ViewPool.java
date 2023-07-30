@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class ViewPool extends Command{
 
+    private final String description = "Список игрушек";
     Console console;
-    private String desription = "Просмотреть все варианты выигрыша";
 
     public ViewPool(Console console){
         super(console);
@@ -15,14 +15,13 @@ public class ViewPool extends Command{
     }
 
     @Override
-    public String getDiscription() {
-        return desription;
+    public String getDescription() {
+        return description;
     }
 
     @Override
     public void execute() {
-        ArrayList<String> viewToys = new ArrayList<>();
-        viewToys = console.viewAll();
+        ArrayList<String> viewToys = console.viewAll();
         for (String s: viewToys) {
             console.print(s);
         }

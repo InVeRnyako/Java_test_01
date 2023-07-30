@@ -4,13 +4,21 @@ package Model;
 import Model.Elements.ToyItem;
 import Presenter.Presenter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
-public class EditPool {
+public class EditPool implements Serializable {
     Pool<ToyItem> pool;
     Presenter presenter;
     DataLogger dataLogger;
+    SafeLoad safeLoad;
+
+    public EditPool(){
+        this.pool = new Pool<>();
+        safeLoad = new SafeLoad();
+    }
 
     public void resetPool(){
         pool = new Pool<>();
@@ -18,10 +26,13 @@ public class EditPool {
         pool.getData().add(new ToyItem(2, "Игрушка №2", 100, 50));
         pool.getData().add(new ToyItem(3, "Игрушка №3", 50, 100));
         pool.getData().add(new ToyItem(4,"Игрушка №4", 100, 200));
+        pool.getData().add(new ToyItem(5, "123", 50,100));
+        saveData();
     }
+
     public void editToy(Integer toyId, String newTitle, String newAmount, String newWeight) {
         for (ToyItem toy: pool.getData()) {
-            if (toy.getId() == toyId){
+            if (toy.getId().equals(toyId)){
                 if (!newTitle.isBlank())
                     toy.setTitle(newTitle);
                 if (!newAmount.replaceAll("[^0-9]","").isBlank()){
@@ -33,30 +44,26 @@ public class EditPool {
                 return;
             }
         }
-        return;
     }
+//    public EditPool(Pool pool){
+//        this.pool = pool;
+//    }
 
     public void setPresenter(Presenter presenter) {
         this.presenter = presenter;
         this.dataLogger = new DataLogger(presenter);
     }
-    public EditPool(Pool pool){
-        this.pool = pool;
-    }
 
-    public EditPool(){
-        this.pool = new Pool<>();
-    }
-
-    public String showAll(){
-        StringBuilder outputString =  new StringBuilder();
-        String prefix = "";
-        for (ToyItem t: pool.getData()) {
-            outputString.append(prefix);
-            outputString.append(t);
-        }
-        return outputString.toString();
-    }
+//
+//    public String showAll(){
+//        StringBuilder outputString =  new StringBuilder();
+//        String prefix = "";
+//        for (ToyItem t: pool.getData()) {
+//            outputString.append(prefix);
+//            outputString.append(t);
+//        }
+//        return outputString.toString();
+//    }
     public void addToy(ToyItem newToyItem){
         if (newToyItem == null)
             return;
@@ -71,10 +78,12 @@ public class EditPool {
     }
     public void changeAmount(Integer id, Integer change) {
         for (ToyItem toy: pool.getData()) {
-            if (toy.getId() == id) {
+            if (toy.getId().equals(id)) {
                 toy.setAmount(toy.getAmount() + change);
-                if (toy.getAmount() < 0)
-                    toy.setAmount(0);
+                if (toy.getAmount() < 1) {
+                    deleteToy(toy.getId());
+                    return;
+                }
             }
         }
     }
@@ -86,7 +95,7 @@ public class EditPool {
 
     public Integer tryRemoveToys(Integer id, Integer toRemove){
         for (ToyItem toy: pool.getData()) {
-            if (toy.getId() == id){
+            if (toy.getId().equals(id)){
                 if (toy.getAmount() >= toRemove){
                     changeAmount(id,toRemove * -1);
                     return 0; // Количество игрушек успешно уменьшено
@@ -98,31 +107,43 @@ public class EditPool {
         return -1; // неверный id
     }
 
-    public Integer getTotalWeight(){
-        Integer totalWeight = 0;
+    public int getTotalWeight(){
+        int totalWeight = 0;
         for (ToyItem toy: pool.getData()) {
             totalWeight = totalWeight + (toy.getWeight() * toy.getAmount());
         }
         return totalWeight;
     }
 
-    public ArrayList<String> raffleWeighted(Integer amountOfIds){
+    public int toysAvailable(){ // Количество игрушек, доступных для розыгрыша
+        int count = 0;
+        for (ToyItem toy: pool.getData()) {
+            if (toy.getWeight() > 0){
+                count = count + toy.getAmount();
+            }
+        }
+        return count;
+    }
+
+    public ArrayList<String> raffleWeighted(Integer toysToRaffle){
+        if (toysAvailable()<toysToRaffle)
+            return null;
         ArrayList<String> winList = new ArrayList<>();
         ArrayList<String> winnersForLog = new ArrayList<>();
-        Integer randomNumber; // Случайное число среди суммарного веса
-        Double chanceToWin = 0.0;
-        for (int i = 0; i < amountOfIds; i++) {
+        int randomNumber; // Случайное число среди суммарного веса
+        double chanceToWin;
+        for (int i = 0; i < toysToRaffle; i++) {
             randomNumber = ThreadLocalRandom.current().nextInt(1,getTotalWeight() + 1);
             for (ToyItem toy: pool.getData()) {
                 if (randomNumber <= toy.getWeight() * toy.getAmount()){
                     winList.add(toy.toString());
-                    chanceToWin = (double) (getTotalWeight()) / (double) (toy.getWeight() * toy.getAmount());
-//                    winnersForLog.add(toy.toString() + ". Шанс выигрыша: " + Math.round(), 2) )
-                    winnersForLog.add(String.format("%s. Шанс выигрыша: %.2f", toy.toString(), chanceToWin));
+                    chanceToWin = (double) (toy.getWeight() * toy.getAmount()) / (double) (getTotalWeight());
+                    winnersForLog.add(dataLogger.prepareToLog(
+                            String.format("%s. Шанс выигрыша: %.2f%%", toy.toString(), chanceToWin * 100)));
                     changeAmount(toy.getId(),-1);
                     break;
                 } else {
-                    randomNumber = randomNumber - toy.getWeight() * toy.getAmount();
+                    randomNumber = randomNumber - (toy.getWeight() * toy.getAmount());
                 }
             }
         }
@@ -150,26 +171,39 @@ public class EditPool {
 
     public String getToyFullInfo(Integer toyId) {
         for (ToyItem toy: pool.getData()) {
-            if (toy.getId() == toyId)
+            if (toy.getId().equals(toyId))
                 return toy.getFullInfo();
         }
         return "Ошибка";
     }
 
-    public void deleteToy(Integer toyId) {
-        for (ToyItem toy: pool.getData()) {
-            if (toy.getId() == toyId){
-                pool.getData().remove(toy);
-            }
-        }
-
+    public boolean deleteToy(Integer toyId) {
+        Predicate<ToyItem> condition = toyItem -> toyItem.getId().equals(toyId);
+        pool.getData().removeIf(condition);
+        return true;
     }
 
     public ArrayList<String> viewAll() {
         ArrayList<String> outputList = new ArrayList<>();
+        if (pool.getData().size() < 1){
+            outputList.add("<Список игрушек пуст>");
+            return outputList;
+        }
         for (ToyItem toy: pool.getData()) {
             outputList.add(toy.getFullInfo());
         }
         return outputList;
+    }
+
+    public void saveData() {
+        safeLoad.saveData(pool);
+    }
+
+    public boolean loadData(){
+        Object data = safeLoad.readData();
+        if (data instanceof Pool){
+            pool = (Pool<ToyItem>) data;
+        }
+        return true;
     }
 }

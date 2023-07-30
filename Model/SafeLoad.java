@@ -1,6 +1,8 @@
 package Model;
 
 import java.io.*;
+import Model.Elements.ToyItem;
+import Model.Pool;
 
 public class SafeLoad implements Serializable {
     private String saveFileName;
@@ -29,7 +31,7 @@ public class SafeLoad implements Serializable {
     }
 
     public Object readData(){
-        Object importObject = new Pool();
+        Object importObject = new Pool<ToyItem>();
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(saveFileName))) {
             importObject = ois.readObject();
             result = "Данные из файла успешно загружены";

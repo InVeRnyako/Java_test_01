@@ -4,22 +4,21 @@ import View.Console;
 
 public class LoadPreLoad extends Command{
 
+        private final String description = "Загрузить демонстративный набор игрушек";
         Console console;
-        private String desription = "Загрузить демонстративный набор игрушек";
-
         public LoadPreLoad(Console console){
             super(console);
             this.console = console;
         }
-
         @Override
-        public String getDiscription() {
-            return desription;
+        public String getDescription() {
+            return description;
         }
 
         @Override
         public void execute() {
             console.loadPreLoad();
+            console.autoSaveSwitch(false);
         }
 
     }
